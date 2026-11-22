@@ -40,6 +40,39 @@ public class AppException extends RuntimeException {
         return of(ErrorCode.RESOURCE_NOT_FOUND, what + " not found: " + id);
     }
 
+    public static AppException projectNotFound(Long id) {
+        return of(ErrorCode.PROJECT_NOT_FOUND, "Project not found: " + id);
+    }
+
+    public static AppException trackerItemNotFound(Long projectId, Long itemId) {
+        return of(ErrorCode.TRACKER_ITEM_NOT_FOUND,
+                "Task or tasklet " + itemId + " not found in project " + projectId);
+    }
+
+    public static AppException workerNotFound(Long id) {
+        return of(ErrorCode.WORKER_NOT_FOUND, "Worker not found: " + id);
+    }
+
+    public static AppException invalidHierarchy(String message) {
+        return of(ErrorCode.INVALID_HIERARCHY, message);
+    }
+
+    public static AppException duplicateProjectName(String name) {
+        return of(ErrorCode.DUPLICATE_PROJECT_NAME, "A project named '" + name + "' already exists");
+    }
+
+    public static AppException duplicateWorkerEmail(String email) {
+        return of(ErrorCode.DUPLICATE_WORKER_EMAIL, "A worker with email " + email + " already exists");
+    }
+
+    public static AppException workerInactive(Long id) {
+        return of(ErrorCode.WORKER_INACTIVE, "Worker " + id + " is not active and cannot be assigned");
+    }
+
+    public static AppException invalidDates(String message) {
+        return of(ErrorCode.INVALID_DATES, message);
+    }
+
     // ── Business rules (409) ─────────────────────────────────────────────────
 
     public static AppException conflict(String message) {

@@ -9,7 +9,7 @@ Java 17 · Spring Boot 3.4.1 · Maven wrapper · MySQL 8 · Flyway · Keycloak J
 ## Run locally
 
 ```powershell
-docker compose -f docker-compose.local.yml up -d   # MySQL on localhost:3306, phpMyAdmin on localhost:8081
+docker compose -f docker-compose.local.yml up -d   # MySQL :3306, phpMyAdmin :8081, Redis :6379
 .\mvnw.cmd spring-boot:run                          # dev profile, port 8080
 ```
 
@@ -52,6 +52,33 @@ src/main/java/com/managify
 ├── exception/         ErrorCode, AppException, GlobalExceptionHandler
 └── utils/             Helpers; utils/mapper: MapStruct mappers
 src/main/resources/db/migration   Flyway migrations (V<n>__<what>.sql)
+```
+
+## Project management module (`com.managify.projects`)
+
+Projects (name, start/end date, status) with a **tracker** of tasks and their tasklets, and **workers** assigned to either.
+
+- Tasks and tasklets share the `tracker_items` table: no parent = task, parent = tasklet. Only two levels.
+- A task with dated tasklets spans the earliest tasklet start to the latest tasklet end (`datesDerived: true`).
+- Every tracker write returns the updated tree.
+
+| Action | Endpoint |
+|---|---|
+| Tracker tree (cached) | `GET /api/v1/projects/{id}/tracker` |
+| Add task / tasklet | `POST /api/v1/projects/{pid}/tasks`, `POST .../tasks/{taskId}/tasklets` |
+| Edit / delete | `PATCH`, `DELETE .../items/{id}` (deleting a task deletes its tasklets) |
+| Reorder | `POST .../items/{id}/move-up`, `/move-down` |
+| Task → tasklet, or move a tasklet | `POST .../items/{id}/make-tasklet` `{ "parentTaskId": 1 }` (409 if the task still has tasklets) |
+| Tasklet → task | `POST .../items/{id}/make-task` |
+| Assign / unassign | `PUT` / `DELETE .../items/{id}/assignee` `{ "workerId": 1 }` |
+| Projects, workers | `/api/v1/projects`, `/api/v1/workers`, `GET /api/v1/workers/{id}/items` (cached) |
+
+**Caching (Redis):** `projectTracker`, `project`, `worker` and `workerItems` hold response DTOs under
+`managify::<cache>::<id>`. Writes evict the affected entries after the transaction commits
+(`ProjectCacheEvictor`); TTLs are in `app.cache.ttl.*`. If Redis is down, the API serves straight from MySQL.
+
+```powershell
+docker exec -it managify-redis redis-cli -a managify keys "managify::*"
 ```
 
 ## Conventions
