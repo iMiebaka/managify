@@ -32,11 +32,12 @@ public final class TrackerMapper {
     }
 
     public static WorkerResponse toResponse(Worker w) {
-        return new WorkerResponse(w.getId(), w.getFullName(), w.getEmail(), w.getKeycloakUserId(), w.isActive());
+        return new WorkerResponse(w.getId(), w.getFullName(), w.getEmail(), w.getKeycloakUserId(),
+                w.getImageUrl(), w.isActive());
     }
 
     public static WorkerSummary toSummary(Worker w) {
-        return w == null ? null : new WorkerSummary(w.getId(), w.getFullName(), w.isActive());
+        return w == null ? null : new WorkerSummary(w.getId(), w.getFullName(), w.getImageUrl(), w.isActive());
     }
 
     public static AssignedItemResponse toAssigned(TrackerItem i) {

@@ -26,6 +26,10 @@ public class Worker extends FullyAuditableEntity {
     @Column(length = 64)
     private String keycloakUserId;
 
+    /** Optional http(s) link to the worker's profile image. */
+    @Column(length = 1000)
+    private String imageUrl;
+
     @Column(nullable = false)
     private boolean active = true;
 }

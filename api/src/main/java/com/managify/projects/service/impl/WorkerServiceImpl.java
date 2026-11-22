@@ -89,7 +89,11 @@ public class WorkerServiceImpl implements WorkerService {
     private static void apply(Worker worker, WorkerRequest request, String email) {
         worker.setFullName(request.fullName().trim());
         worker.setEmail(email);
-        worker.setKeycloakUserId(request.keycloakUserId() == null || request.keycloakUserId().isBlank()
-                ? null : request.keycloakUserId().trim());
+        worker.setKeycloakUserId(blankToNull(request.keycloakUserId()));
+        worker.setImageUrl(blankToNull(request.imageUrl()));
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

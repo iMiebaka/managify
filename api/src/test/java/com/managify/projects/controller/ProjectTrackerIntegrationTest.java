@@ -80,7 +80,9 @@ class ProjectTrackerIntegrationTest extends IntegrationTestBase {
 
         // Assignment
         tree = call(put(tracker(projectId, "/items/" + a2 + "/assignee")), Map.of("workerId", workerId), 200);
-        assertThat(tasklet(tree, "A", "a2").get("assignee").get("id").asLong()).isEqualTo(workerId);
+        JsonNode assignee = tasklet(tree, "A", "a2").get("assignee");
+        assertThat(assignee.get("id").asLong()).isEqualTo(workerId);
+        assertThat(assignee.get("imageUrl").asText()).isEqualTo("https://example.com/avatars/ada.png");
         JsonNode items = call(get("/api/v1/workers/" + workerId + "/items"), null, 200).get("items");
         assertThat(items).hasSize(1);
         assertThat(items.get(0).get("parentTaskTitle").asText()).isEqualTo("A");
@@ -117,6 +119,8 @@ class ProjectTrackerIntegrationTest extends IntegrationTestBase {
 
         call(post("/api/v1/projects"), Map.of("name", unique(), "startDate", "2027-02-01", "endDate", "2027-01-01"), 400);
         call(get("/api/v1/projects/999999/tracker"), null, 404);
+        call(post("/api/v1/workers"), Map.of("fullName", "Bad Image", "email", UUID.randomUUID() + "@example.com",
+                "imageUrl", "not-a-url"), 400);
 
         long projectId = createProject();
         long task = id(call(post(tracker(projectId, "/tasks")), Map.of("title", "T"), 201), "T");
@@ -151,7 +155,8 @@ class ProjectTrackerIntegrationTest extends IntegrationTestBase {
 
     private long createWorker() throws Exception {
         return call(post("/api/v1/workers"),
-                Map.of("fullName", "Ada Worker", "email", UUID.randomUUID() + "@example.com"), 201)
+                Map.of("fullName", "Ada Worker", "email", UUID.randomUUID() + "@example.com",
+                        "imageUrl", "https://example.com/avatars/ada.png"), 201)
                 .get("id").asLong();
     }
 
