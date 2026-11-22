@@ -1,0 +1,47 @@
+# Local infrastructure for managify-api: MySQL and phpMyAdmin.
+#
+#   Start:  docker compose -f docker-compose.local.yml up -d
+#   Stop:   docker compose -f docker-compose.local.yml down        (add -v to also wipe the data)
+#
+#   MySQL       localhost:3306          root / root, database managify_db
+#   phpMyAdmin  http://localhost:8081   logs in as root automatically
+#
+# For deploying the service itself, see docker-compose.yml.
+
+name: managify-local
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: managify-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: managify_db
+      TZ: Africa/Lagos
+    ports:
+      - "3306:3306"
+    volumes:
+      - managify-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    container_name: managify-phpmyadmin
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "8081:80"
+
+volumes:
+  managify-mysql-data:

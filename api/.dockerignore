@@ -1,0 +1,25 @@
+# Build output — never copy into build context
+target/
+
+# Version control
+.git/
+.gitignore
+
+# IDE / editor directories
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Keys — never bake into the image
+*.pem
+
+# Local environment files
+.env
+
+# Logs
+logs/
+
+# Claude Code local settings
+.claude/
