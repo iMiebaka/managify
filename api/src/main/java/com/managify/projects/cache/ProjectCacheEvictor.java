@@ -1,22 +1,26 @@
 package com.managify.projects.cache;
 
-import com.managify.config.CacheNames;
-import com.managify.projects.repository.TrackerItemRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.managify.config.CacheNames;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import com.managify.projects.repository.TrackerItemRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.*;
 
 /**
- * Evicts cache entries <b>after the transaction commits</b>, so a rolled-back write never empties the
- * cache, and a read racing the write cannot re-cache the old state between eviction and commit.
+ * Evicts cache entries <b>after the transaction commits</b>, so a rolled-back
+ * write never empties the
+ * cache, and a read racing the write cannot re-cache the old state between
+ * eviction and commit.
  *
- * <p>Call the methods from inside the write's transaction; they collect what to evict and publish it.
+ * <p>
+ * Call the methods from inside the write's transaction; they collect what to
+ * evict and publish it.
  */
 @Slf4j
 @Component
@@ -29,13 +33,17 @@ public class ProjectCacheEvictor {
 
     private final TrackerItemRepository items;
 
-    public record Eviction(String cache, Object key) {}
+    public record Eviction(String cache, Object key) {
+    }
 
-    public record EvictionBatch(List<Eviction> evictions) {}
+    public record EvictionBatch(List<Eviction> evictions) {
+    }
 
     /**
-     * The project's tracker, plus the assignment lists of every worker assigned in the project and of
-     * {@code extraWorkerIds} (e.g. a worker just unassigned, who no longer shows up in the query).
+     * The project's tracker, plus the assignment lists of every worker assigned in
+     * the project and of
+     * {@code extraWorkerIds} (e.g. a worker just unassigned, who no longer shows up
+     * in the query).
      * Call it before deleting items, so their assignees are still found.
      */
     public void trackerChanged(Long projectId, Long... extraWorkerIds) {
@@ -55,7 +63,10 @@ public class ProjectCacheEvictor {
         trackerChanged(projectId);
     }
 
-    /** The worker, their assignment list and the trackers of every project they are assigned in. */
+    /**
+     * The worker, their assignment list and the trackers of every project they are
+     * assigned in.
+     */
     public void workerChanged(Long workerId) {
         List<Eviction> evictions = new ArrayList<>();
         evictions.add(new Eviction(CacheNames.WORKER, workerId));
