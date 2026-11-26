@@ -13,6 +13,12 @@ docker compose -f docker-compose.local.yml up -d   # MySQL :3306, phpMyAdmin :80
 .\mvnw.cmd spring-boot:run                          # dev profile, port 8080
 ```
 
+In Git Bash, use `./mvnw` instead of `.\mvnw.cmd` (e.g. `./mvnw spring-boot:run`).
+
+**Hot restart (dev only):** the `dev` Maven profile adds `spring-boot-devtools`, which restarts the app
+when compiled classes change (save in the IDE, or run `mvnw compile` in another terminal).
+It is not on the classpath with `-Pstaging` / `-Pprod`, and is never included in a packaged jar or the Docker image.
+
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - Health: http://localhost:8080/actuator/health
 - Ping: http://localhost:8080/public/ping
@@ -25,7 +31,7 @@ authenticated request, so the app starts without Keycloak.
 
 | Profile   | How                                            | Config                              |
 |-----------|------------------------------------------------|-------------------------------------|
-| `dev`     | default Maven profile                          | `application-dev.properties`        |
+| `dev`     | default Maven profile (includes devtools)      | `application-dev.properties`        |
 | `staging` | `-Pstaging` or `SPRING_PROFILES_ACTIVE=staging`| env vars: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `BASE_URL`, `CORS_ALLOWED_ORIGINS` |
 | `prod`    | `-Pprod` or `SPRING_PROFILES_ACTIVE=prod`      | same as staging                     |
 
